@@ -1,0 +1,21 @@
+{
+    "C_Cpp.errorSquiggles": "enabled",
+    "C_Cpp.autocomplete": "default",
+    "C_Cpp.intelliSenseEngine": "default",
+    "[c]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "editor.formatOnSave": true,
+    "C_Cpp.formatting": "default",
+    "C_Cpp.clang_format_fallbackStyle": "Google",
+    "files.associations": {
+        "stm32f1xx_hal.h": "c",
+        "usart.h": "c",
+        "pid.h": "c",
+        "timer.h": "c",
+        "delay.h": "c",
+        "sys.h": "c",
+        "led.h": "c",
+        "key.h": "c"
+    }
+}

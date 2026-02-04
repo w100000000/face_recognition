@@ -1,0 +1,67 @@
+{
+  "configurations": [
+    {
+      "name": "Keil-STM32F103-ARMCC",
+      "compilerPath":"D:\\ARM\\ARMCC\\bin\\armcc.exe",
+      "intelliSenseMode": "gcc-arm",
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/Drivers/CMSIS/Include",
+        "${workspaceFolder}/Drivers/CMSIS/Core/Include",
+        "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+        "${workspaceFolder}/Drivers/STM32F1xx_HAL_Driver/Inc",
+        "${workspaceFolder}/Drivers/CMSIS/DSP/Include",
+        "${workspaceFolder}/Drivers/SYSTEM",
+        "${workspaceFolder}/Drivers/BSP",
+        "${workspaceFolder}/User/Inc",
+        "${workspaceFolder}/User/Src"
+      ],
+      "defines": [
+        "STM32F103xE",
+        "USE_HAL_DRIVER",
+        "ARM_MATH_CM3",
+        "__ARMCC_VERSION"
+      ],
+      "browse": {
+        "path": [
+          "${workspaceFolder}"
+        ],
+        "limitSymbolsToIncludedHeaders": true
+      }
+    },
+    {
+      "name": "Keil-STM32F103-ARMCLANG",
+      "compilerPath": "C:/Keil_v5/ARM/ARMCLANG/bin/armclang.exe",
+      "intelliSenseMode": "gcc-arm",
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/Drivers/CMSIS/Include",
+        "${workspaceFolder}/Drivers/CMSIS/Core/Include",
+        "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+        "${workspaceFolder}/Drivers/STM32F1xx_HAL_Driver/Inc",
+        "${workspaceFolder}/Drivers/CMSIS/DSP/Include",
+        "${workspaceFolder}/Drivers/SYSTEM",
+        "${workspaceFolder}/Drivers/BSP",
+        "${workspaceFolder}/User/Inc",
+        "${workspaceFolder}/User/Src"
+      ],
+      "defines": [
+        "STM32F103xE",
+        "USE_HAL_DRIVER",
+        "ARM_MATH_CM3",
+        "__ARMCLANG_VERSION__"
+      ],
+      "browse": {
+        "path": [
+          "${workspaceFolder}"
+        ],
+        "limitSymbolsToIncludedHeaders": true
+      }
+    }
+  ],
+  "version": 4
+}
