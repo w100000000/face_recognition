@@ -3,8 +3,8 @@
     {
       "name": "Keil-STM32F103-ARMCC",
       "compilerPath":"D:\\ARM\\ARMCC\\bin\\armcc.exe",
-      "intelliSenseMode": "gcc-arm",
-      "cStandard": "c11",
+      "intelliSenseMode": "msvc-arm",
+      "cStandard": "c99",
       "cppStandard": "c++17",
       "includePath": [
         "${workspaceFolder}/**",
@@ -16,7 +16,9 @@
         "${workspaceFolder}/Drivers/SYSTEM",
         "${workspaceFolder}/Drivers/BSP",
         "${workspaceFolder}/User/Inc",
-        "${workspaceFolder}/User/Src"
+        "${workspaceFolder}/User/Src",
+        "D:/ARM/ARMCC/include",
+        "D:/ARM/ARMCC/lib"
       ],
       "defines": [
         "STM32F103xE",
@@ -33,7 +35,7 @@
     },
     {
       "name": "Keil-STM32F103-ARMCLANG",
-      "compilerPath": "C:/Keil_v5/ARM/ARMCLANG/bin/armclang.exe",
+      "compilerPath": "D:\\ARM\\ARMCC\\bin\\armcc.exe",
       "intelliSenseMode": "gcc-arm",
       "cStandard": "c11",
       "cppStandard": "c++17",
@@ -47,7 +49,9 @@
         "${workspaceFolder}/Drivers/SYSTEM",
         "${workspaceFolder}/Drivers/BSP",
         "${workspaceFolder}/User/Inc",
-        "${workspaceFolder}/User/Src"
+        "${workspaceFolder}/User/Src",
+        "D:/ARM/ARMCC/include",
+        "D:/ARM/ARMCC/lib"
       ],
       "defines": [
         "STM32F103xE",

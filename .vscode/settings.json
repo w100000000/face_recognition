@@ -2,6 +2,8 @@
     "C_Cpp.errorSquiggles": "enabled",
     "C_Cpp.autocomplete": "default",
     "C_Cpp.intelliSenseEngine": "default",
+    "C_Cpp.intelliSenseEngineMaxCacheSize": 16,
+    "C_Cpp.default.cStandard": "c11",
     "[c]": {
         "editor.defaultFormatter": "ms-vscode.cpptools"
     },
