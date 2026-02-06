@@ -5,11 +5,15 @@
     "C_Cpp.intelliSenseEngineMaxCacheSize": 16,
     "C_Cpp.default.cStandard": "c11",
     "[c]": {
-        "editor.defaultFormatter": "ms-vscode.cpptools"
+        "editor.defaultFormatter": "ms-vscode.cpptools",
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true,
+        "editor.formatOnType": false
     },
     "editor.formatOnSave": true,
-    "C_Cpp.formatting": "default",
-    "C_Cpp.clang_format_fallbackStyle": "Google",
+    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.clang_format_fallbackStyle": "{\n  BasedOnStyle: Google,\n  IndentWidth: 4,\n  TabWidth: 4,\n  UseTab: Never,\n  ColumnLimit: 120,\n  AlignConsecutiveAssignments: true,\n  AlignTrailingComments: true,\n  AllowShortBlocksOnASingleLine: false,\n  AllowShortIfStatementsOnASingleLine: false,\n  AllowShortLoopsOnASingleLine: false\n}",
+    "C_Cpp.clang_format_style": "{\n  BasedOnStyle: Google,\n  IndentWidth: 4,\n  TabWidth: 4,\n  UseTab: Never,\n  ColumnLimit: 120,\n  AlignConsecutiveAssignments: true,\n  AlignTrailingComments: true,\n  AllowShortFunctionsOnASingleLine: Empty,\n  AllowShortIfStatementsOnASingleLine: false,\n  AllowShortLoopsOnASingleLine: false,\n  AllowShortCaseLabelsOnASingleLine: false\n}",
     "files.associations": {
         "stm32f1xx_hal.h": "c",
         "usart.h": "c",
