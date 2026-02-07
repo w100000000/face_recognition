@@ -1,5 +1,6 @@
 #include "pid.h"
 
+#include <stdint.h>
 // 0、PID初始化函数，给各参数赋值
 // 参数(4个)：Kp，Ki，Kd，处理的PID结构体的地址
 void pid_init(float Kp, float Ki, float Kd, PID_TypeDef* PID) {

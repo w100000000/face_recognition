@@ -1,6 +1,12 @@
 #include "timer.h"
 
+#include <stdint.h>
+
 #include "led.h"
+#include "stm32f1xx_hal.h"
+#include "stm32f1xx_hal_gpio.h"
+#include "stm32f1xx_hal_rcc.h"
+#include "stm32f1xx_hal_tim.h"
 #include "usart.h"
 
 TIM_HandleTypeDef htim3 = {0};

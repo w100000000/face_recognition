@@ -1,7 +1,11 @@
-#include "./BSP/KEY/key.h"
+#include "key.h"
 
-#include "./SYSTEM/delay/delay.h"
+#include <stdint.h>
 
+#include "delay.h"
+#include "stm32f1xx_hal.h"
+#include "stm32f1xx_hal_gpio.h"
+#include "stm32f1xx_hal_rcc.h"
 // 按键初始化函数
 void key_init(void) {
     GPIO_InitTypeDef gpio_init_struct;

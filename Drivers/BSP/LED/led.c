@@ -1,4 +1,8 @@
-#include "./BSP/LED/led.h"
+#include "led.h"
+
+#include "stm32f1xx_hal.h"
+#include "stm32f1xx_hal_gpio.h"
+#include "stm32f1xx_hal_rcc.h"
 
 // 初始化LED0和LED1的GPIO口.并使能这两个口的时钟
 void led_init(void) {
