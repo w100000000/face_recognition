@@ -1,6 +1,6 @@
 #ifndef _LED_H
 #define _LED_H
-#include "./SYSTEM/sys/sys.h"
+#include "sys.h"
 
 #define LED0_GPIO_PORT GPIOB
 #define LED0_GPIO_PIN GPIO_PIN_5
