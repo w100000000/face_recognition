@@ -9,7 +9,7 @@
 #include "stm32f1xx_hal_tim.h"
 #include "usart.h"
 
-TIM_HandleTypeDef htim3 = {0};
+TIM_HandleTypeDef htim3;
 
 // TIM3中断初始化
 void TIM3_Int_Init(uint16_t arr, uint16_t psc) {
@@ -39,7 +39,7 @@ void TIM3_IRQHandler(void) {
 
 // 定时器周期中断回调函数
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
-    if (htim3.Instance == TIM3) {
+    if (htim->Instance == TIM3) {
         LED1_TOGGLE();
     }
 }

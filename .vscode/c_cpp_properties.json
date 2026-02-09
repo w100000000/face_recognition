@@ -17,6 +17,8 @@
         "${workspaceFolder}/Drivers/BSP",
         "${workspaceFolder}/User/Inc",
         "${workspaceFolder}/User/Src",
+        "${workspaceFolder}/PID",
+        "${workspaceFolder}/Middlewares", 
         "D:/ARM/ARMCC/include",
         "D:/ARM/ARMCC/lib"
       ],

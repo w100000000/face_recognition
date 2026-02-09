@@ -1,34 +1,19 @@
-/**
- ******************************************************************************
- * @file    Templates/Inc/main.h
- * @author  MCD Application Team
- * @brief   Header for main.c module
- ******************************************************************************
- * @attention
- *
- * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
- * All rights reserved.</center></h2>
- *
- * This software component is licensed by ST under BSD 3-Clause license,
- * the "License"; You may not use this file except in compliance with the
- * License. You may obtain a copy of the License at:
- *                        opensource.org/licenses/BSD-3-Clause
- *
- ******************************************************************************
- */ \
-#define USE_HAL_DRIVER
-#define STM32F103xB
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __MAIN_H
 #define __MAIN_H
-
-/* Includes ------------------------------------------------------------------*/
-#include "stm3210e_eval.h"
+#include "delay.h"
+#include "key.h"
+#include "led.h"
+#include "pid.h"
 #include "stm32f1xx_hal.h"
-/* Exported types ------------------------------------------------------------*/
-/* Exported constants --------------------------------------------------------*/
-/* Exported macro ------------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */
+#include "stm32f1xx_hal_cortex.h"
+#include "stm32f1xx_hal_gpio.h"
+#include "stm32f1xx_hal_rcc.h"
+#include "stm32f1xx_hal_tim.h"
+#include "stm32f1xx_hal_uart.h"
+#include "usart.h"
+
+void SystemClock_Config(void);
+void assert_failed(uint8_t* file, uint32_t line);
 
 #endif /* __MAIN_H */
 
