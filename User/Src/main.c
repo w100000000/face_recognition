@@ -5,8 +5,8 @@ PID_TypeDef PID_x, PID_y;  // 两个PID结构体PID_x和PID_y
 
 int coords[2];  // 当前坐标数组
 TIM_HandleTypeDef htim3;
-uint16_t targetX = 320;  // 当前x坐标
-uint16_t targetY = 240;  // 当前y坐标
+uint16_t targetX = 640;  // 当前x坐标
+uint16_t targetY = 360;  // 当前y坐标
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -20,25 +20,25 @@ int main(void) {
 
     uint16_t pwmval_x, pwmval_y;  // 控制占空比的变量(CCR寄存器数值)
 
-    delay_init(72);     // 延时函数初始化
-    uart_init(115200);  // 串口初始化为115200
-    LED_Init();         // LED端口初始化
-    KEY_Init();         // 初始化与按键连接的硬件接口
+    delay_init(72);      // 延时函数初始化
+    usart_init(115200);  // 串口初始化为115200
+    led_init();          // LED端口初始化
+    key_init();          // 初始化与按键连接的硬件接口
 
     // 使用 HAL 库初始化定时器3的 PWM 功能
-    TIM3_Int_Init(1000 - 1, 144 - 1);
+    TIM3_PWM_Init(1000 - 1, 144 - 1);
 
     // PID 参数初始化
     pid_init(0.03, 0, 0.30, &PID_x);
     pid_init(0.03, 0, 0.30, &PID_y);
 
     // 初始化坐标值
-    coords[0] = 320;
-    coords[1] = 240;
+    coords[0] = 640;
+    coords[1] = 360;
 
     // 初始化舵机角度
-    pwmval_x = 650;
-    pwmval_y = 650;
+    pwmval_x = 730;
+    pwmval_y = 730;
 
     while (1) {
         // 1、从串口读取当前坐标值，存入 coords 数组中
@@ -54,6 +54,15 @@ int main(void) {
         if (pwmval_y > 400 && pwmval_y < 900)
             __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pwmval_y);  // 设置通道2占空比
     }
+    // // 测试 X 轴极限
+    // while (1) {
+    //     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 200);  // 从小值开始
+    //     delay_ms(1000);                                     // 等待舵机转动
+    // //测试 Y 轴极限
+    // while (1) {
+    //     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
+    //     delay_ms(1000);
+    // }
 }
 
 void SystemClock_Config(void) {

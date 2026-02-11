@@ -4,9 +4,19 @@
 // 0、PID初始化函数，给各参数赋值
 // 参数(4个)：Kp，Ki，Kd，处理的PID结构体的地址
 void pid_init(float Kp, float Ki, float Kd, PID_TypeDef* PID) {
-    PID->Kp = Kp;
-    PID->Ki = Ki;
-    PID->Kd = Kd;
+    PID->Kp          = Kp;
+    PID->Ki          = Ki;
+    PID->Kd          = Kd;
+    PID->error       = 0;
+    PID->last_error  = 0;
+    PID->last_error2 = 0;
+    PID->last_error3 = 0;
+    PID->last_error4 = 0;
+    PID->last_error5 = 0;
+    PID->p_out       = 0;
+    PID->i_out       = 0;
+    PID->d_out       = 0;
+    PID->output      = 0;
 }
 
 // 1、位置PID

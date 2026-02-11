@@ -1,5 +1,5 @@
-#ifndef __SERIAL_H
-#define __SERIAL_H
+#ifndef __SERIAL_COORD_PARSE_H
+#define __SERIAL_COORD_PARSE_H
 
 void recieveData(void);
 
