@@ -10,6 +10,7 @@
 #include "stm32f1xx_hal_rcc.h"
 #include "stm32f1xx_hal_tim.h"
 #include "stm32f1xx_hal_uart.h"
+#include "timer.h"
 #include "usart.h"
 
 void SystemClock_Config(void);

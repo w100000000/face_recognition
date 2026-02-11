@@ -11,6 +11,8 @@
 
 TIM_HandleTypeDef htim3;
 
+static void Error_Handler(void);
+
 // TIM3中断初始化
 void TIM3_Int_Init(uint16_t arr, uint16_t psc) {
     __HAL_RCC_TIM3_CLK_ENABLE();  // 使能定时器时钟
@@ -83,7 +85,7 @@ void TIM3_PWM_Init(uint16_t arr, uint16_t psc) {
     HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 }
 // 错误处理函数
-void Error_Handler(void) {
+static void Error_Handler(void) {
     HAL_TIM_Base_Stop_IT(&htim3);
     HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
     HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);

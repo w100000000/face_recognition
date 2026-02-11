@@ -1,7 +1,7 @@
 #ifndef __KEY_H
 #define __KEY_H
 
-#include "./SYSTEM/sys/sys.h"
+#include "sys.h"
 
 #define KEY0_GPIO_PORT GPIOE
 #define KEY0_GPIO_PIN GPIO_PIN_4

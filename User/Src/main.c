@@ -3,8 +3,7 @@ void SystemClock_Config(void);
 // 定义全局变量
 PID_TypeDef PID_x, PID_y;  // 两个PID结构体PID_x和PID_y
 
-int coords[2];  // 当前坐标数组
-TIM_HandleTypeDef htim3;
+int coords[2];           // 当前坐标数组
 uint16_t targetX = 640;  // 当前x坐标
 uint16_t targetY = 360;  // 当前y坐标
 /* Private functions ---------------------------------------------------------*/
