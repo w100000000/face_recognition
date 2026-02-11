@@ -58,7 +58,7 @@ def Detection(frame):
 # 设置串口参数
 ser = serial.Serial()
 ser.baudrate = 115200    # 设置比特率为115200bps
-ser.port = 'COM3'      # 单片机接在哪个串口，就写哪个串口。这里默认接在"COM3"端口
+ser.port = 'COM5'      # 单片机接在哪个串口，就写哪个串口。这里默认接在"COM5"端口
 ser.open()             # 打开串口
 
 #先发送一个中心坐标使初始化时云台保持水平
