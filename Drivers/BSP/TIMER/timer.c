@@ -51,14 +51,14 @@ void TIM3_PWM_Init(uint16_t arr, uint16_t psc) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     TIM_OC_InitTypeDef sConfigOC     = {0};
     // 使能GPIO和定时器时钟
-    __HAL_RCC_GPIOB_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();  // 改为GPIOA
     __HAL_RCC_TIM3_CLK_ENABLE();
     // 配置GPIO
     GPIO_InitStruct.Pin   = GPIO_PIN_6 | GPIO_PIN_7;
     GPIO_InitStruct.Mode  = GPIO_MODE_AF_PP;  // 复用推挽输出
     GPIO_InitStruct.Pull  = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);  // 改为GPIOA
     // 配置定时器
     htim3.Instance               = TIM3;
     htim3.Init.Prescaler         = psc;
@@ -70,9 +70,9 @@ void TIM3_PWM_Init(uint16_t arr, uint16_t psc) {
         Error_Handler();
     }
     // 配置PWM通道
-    sConfigOC.OCMode     = TIM_OCMODE_PWM2;
-    sConfigOC.Pulse      = 730;  // 初始CCR值，使舵机在中间
-    sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+    sConfigOC.OCMode     = TIM_OCMODE_PWM1;      // PWM模式1
+    sConfigOC.Pulse      = 1500;                 // 初始CCR值，使舵机在中间位置(1.5ms)
+    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;  // 极性为高
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
     if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK) {
         Error_Handler();

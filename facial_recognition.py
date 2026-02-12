@@ -1,3 +1,5 @@
+# -*- coding: gbk -*-
+
 import cv2
 import numpy as np
 import serial
@@ -26,21 +28,23 @@ def Detection(frame):
         centroid_pt=(centroid_X,centroid_Y)   #各人脸形心坐标
         cv2.circle(frame, centroid_pt, 8, (0,0,255), -1)   #绘制各人脸形心
     else:
-     centroid_X = 640
-     centroid_Y = 360
+        frame_h, frame_w = frame.shape[:2]
+        centroid_X = frame_w // 2
+        centroid_Y = frame_h // 2
     #==========================================================================
     #     绘制参考线
     #==========================================================================
+    frame_h, frame_w = frame.shape[:2]
     x = 0;
     y = 0;
-    w = 640;
-    h = 360;
+    w = frame_w // 2;
+    h = frame_h // 2;
     
     rectangle_pts = np.array([[x,y],[x+w,y],[x+w,y+h],[x,y+h]], np.int32) #最小包围矩形各顶点
     cv2.polylines(frame, [rectangle_pts], True, (0,255,0), 2) #绘制最小包围矩形
     
-    x2 = 640;
-    y2 = 360;
+    x2 = frame_w // 2;
+    y2 = frame_h // 2;
     rectangle_pts2 = np.array([[x2,y2],[x2+w,y2],[x2+w,y2+h],[x2,y2+h]], np.int32) #最小包围矩形各顶点
     cv2.polylines(frame, [rectangle_pts2], True, (0,255,0), 2) #绘制最小包围矩形
 
@@ -61,11 +65,27 @@ ser.baudrate = 115200    # 设置比特率为115200bps
 ser.port = 'COM5'      # 单片机接在哪个串口，就写哪个串口。这里默认接在"COM5"端口
 ser.open()             # 打开串口
 
-#先发送一个中心坐标使初始化时云台保持水平
-data = '#'+str('640')+'$'+str('360')+'\r\n'
-ser.write(data.encode())        
-
 cap = cv2.VideoCapture(1) #打开摄像头
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)  # 请求1280分辨率
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)   # 请求720分辨率
+if not cap.isOpened():
+    print("Camera open failed")
+    ser.close()
+    raise SystemExit(1)
+print("Camera opened")
+
+# 读一帧确认实际分辨率
+ret, frame = cap.read()
+if not ret:
+    print("Camera read failed")
+    ser.close()
+    raise SystemExit(1)
+frame_h, frame_w = frame.shape[:2]
+print(f"Actual resolution: {frame_w}x{frame_h}")
+
+#先发送一个中心坐标使初始化时云台保持水平
+data = '#'+str(frame_w // 2)+'$'+str(frame_h // 2)+'\r\n'
+ser.write(data.encode())
 
 while(cap.isOpened()):
     _, frame = cap.read()
@@ -79,6 +99,7 @@ while(cap.isOpened()):
         print(Y)
         #按照协议将形心坐标打包并发送至串口
         data = '#'+str(X)+'$'+str(Y)+'\r\n'
+        print('Send: ' + data)  # 调试：打印实际发送的数据
         ser.write(data.encode())
     
     k = cv2.waitKey(5) & 0xFF

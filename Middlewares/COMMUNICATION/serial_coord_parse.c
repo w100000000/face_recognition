@@ -14,8 +14,9 @@ uint16_t times = 0;
 extern int coords[2];
 
 void recieveData(void) {
-    uint8_t flag = 0;
-    char strX[4], strY[4];
+    uint8_t flag    = 0;
+    char strX[6]    = {0};
+    char strY[6]    = {0};
     uint8_t cnt_x   = 0;
     uint8_t cnt_y   = 0;
     uint8_t* adress = NULL;
@@ -24,7 +25,7 @@ void recieveData(void) {
     {
         LED1_TOGGLE();  // 1号指示灯变更状态
 
-        len = g_usart_rx_sta & 0x3fff;  // 得到此次接收到的数据长度
+        len = g_usart_rx_sta & 0x3FFF;  // 得到此次接收到的数据长度
 
         adress = &g_usart_rx_buf[0];  // 指针adress储存字符地址，从0-len过一遍
 
@@ -32,11 +33,15 @@ void recieveData(void) {
         for (t = 0; t < len; t++) {
             if (*adress >= '0' && *adress <= '9') {
                 if (flag == 1) {
-                    strX[cnt_x] = *adress;
-                    cnt_x++;
+                    if (cnt_x < (sizeof(strX) - 1)) {
+                        strX[cnt_x] = *adress;
+                        cnt_x++;
+                    }
                 } else {
-                    strY[cnt_y] = *adress;
-                    cnt_y++;
+                    if (cnt_y < (sizeof(strY) - 1)) {
+                        strY[cnt_y] = *adress;
+                        cnt_y++;
+                    }
                 }
             } else {
                 if (*adress == '#')
@@ -50,6 +55,7 @@ void recieveData(void) {
         // 转换字符串为整型，并存储到全局变量coords中
         coords[0] = atoi(strX);
         coords[1] = atoi(strY);
+        printf("Parsed: X=%d Y=%d (strX=%s strY=%s)\r\n", coords[0], coords[1], strX, strY);
         // 标志位清零
         g_usart_rx_sta = 0;
     } else {

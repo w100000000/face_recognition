@@ -24,8 +24,8 @@ int main(void) {
     led_init();          // LED端口初始化
     key_init();          // 初始化与按键连接的硬件接口
 
-    // 使用 HAL 库初始化定时器3的 PWM 功能
-    TIM3_PWM_Init(1000 - 1, 144 - 1);
+    // 使用                                                                              HAL 库初始化定时器3的 PWM 功能
+    TIM3_PWM_Init(20000 - 1, 72 - 1);  // 50Hz舵机PWM频率
 
     // PID 参数初始化
     pid_init(0.03, 0, 0.30, &PID_x);
@@ -36,8 +36,8 @@ int main(void) {
     coords[1] = 360;
 
     // 初始化舵机角度
-    pwmval_x = 730;
-    pwmval_y = 730;
+    pwmval_x = 1500;  // 中间位置
+    pwmval_y = 1500;  // 中间位置
 
     while (1) {
         // 1、从串口读取当前坐标值，存入 coords 数组中
@@ -48,22 +48,30 @@ int main(void) {
         pwmval_y = pwmval_y - pid(coords[1], targetY, &PID_y);
 
         // 3、分别将控制参数赋值给定时器3的 PWM 通道1、通道2
-        if (pwmval_x > 300 && pwmval_x < 1200)
+        if (pwmval_x > 600 && pwmval_x < 2400)
             __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pwmval_x);  // 设置通道1占空比
-        if (pwmval_y > 400 && pwmval_y < 900)
+        if (pwmval_y > 500 && pwmval_y < 2000)
             __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pwmval_y);  // 设置通道2占空比
     }
-    // // 测试 X 轴极限
+    // 测试 X 轴极限
     // while (1) {
-    //     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 200);  // 从小值开始
-    //     delay_ms(1000);                                     // 等待舵机转动
-    // //测试 Y 轴极限
+    //     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 600);   // 最小角度(0.5ms)
+    //     delay_ms(2000);                                      // 等待舵机转动
+    //     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 1500);  // 中间角度(1.5ms)
+    //     delay_ms(2000);
+    //     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 2400);  // 最大角度(2.5ms)
+    //     delay_ms(2000);
+    // }
+    // 测试 Y 轴极限
     // while (1) {
-    //     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
-    //     delay_ms(1000);
+    //     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 500);  // 最小角度
+    //     delay_ms(2000);
+    //     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 1500);  // 中间角度
+    //     delay_ms(2000);
+    //     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 2000);  // 最大角度
+    //     delay_ms(2000);
     // }
 }
-
 void SystemClock_Config(void) {
     RCC_ClkInitTypeDef clkinitstruct = {0};
     RCC_OscInitTypeDef oscinitstruct = {0};
