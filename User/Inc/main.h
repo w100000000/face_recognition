@@ -12,6 +12,7 @@
 #include "stm32f1xx_hal_uart.h"
 #include "timer.h"
 #include "usart.h"
+#include "usmart.h"
 
 void SystemClock_Config(void);
 void assert_failed(uint8_t* file, uint32_t line);

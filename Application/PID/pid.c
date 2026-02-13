@@ -1,6 +1,9 @@
 #include "pid.h"
 
 #include <stdint.h>
+
+extern PID_TypeDef PID_x;
+extern PID_TypeDef PID_y;
 // 0、PID初始化函数，给各参数赋值
 // 参数(4个)：Kp，Ki，Kd，处理的PID结构体的地址
 void pid_init(float Kp, float Ki, float Kd, PID_TypeDef* PID) {
@@ -53,4 +56,12 @@ int better_pid(int present, uint16_t target, PID_TypeDef* PID) {
     PID->last_error  = PID->error;        // 上次误差 = 本次误差
 
     return PID->output;
+}
+
+void pid_set_x(uint32_t kp, uint32_t ki, uint32_t kd) {
+    pid_init(kp / 1000.0f, ki / 1000.0f, kd / 1000.0f, &PID_x);
+}
+
+void pid_set_y(uint32_t kp, uint32_t ki, uint32_t kd) {
+    pid_init(kp / 1000.0f, ki / 1000.0f, kd / 1000.0f, &PID_y);
 }

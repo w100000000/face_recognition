@@ -13,5 +13,7 @@ typedef struct {
 int pid(int present, uint16_t target, PID_TypeDef* PID);  // 三个参数：当前位置，目标位置，PID结构体
 int better_pid(int present, uint16_t target, PID_TypeDef* PID);
 void pid_init(float Kp, float Ki, float Kd, PID_TypeDef* PID);  // 4个参数：Kp,Ki,Kd,PID结构体
+void pid_set_x(uint32_t kp, uint32_t ki, uint32_t kd);
+void pid_set_y(uint32_t kp, uint32_t ki, uint32_t kd);
 
 #endif
