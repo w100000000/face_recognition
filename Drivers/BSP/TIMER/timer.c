@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "beep.h"
 #include "led.h"
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx_hal_gpio.h"
@@ -89,8 +90,9 @@ static void Error_Handler(void) {
     HAL_TIM_Base_Stop_IT(&htim3);
     HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
     HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2);
+    printf("ERROR: Timer initialization failed!\r\n");
     while (1) {
-        LED1_TOGGLE();
+        BEEP_TOGGLE();  // ·äÃùÆ÷Ãù½Ð
         HAL_Delay(100);
     }
 }

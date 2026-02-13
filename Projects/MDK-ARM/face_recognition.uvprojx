@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F103xE,USE_HAL_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\User\Inc;..\..\Application\PID;..\..\Middlewares\COMMUNICATION;..\..\Drivers\BSP\LED;..\..\Drivers\BSP\KEY;..\..\Drivers\BSP\TIMER;..\..\Drivers\SYSTEM\delay;..\..\Drivers\SYSTEM\sys;..\..\Drivers\SYSTEM\usart;..\..\Drivers\STM32F1xx_HAL_Driver\Inc;..\..\Drivers\CMSIS\Device\ST\STM32F1xx\Include;..\..\Drivers\CMSIS\Include</IncludePath>
+              <IncludePath>..\..\User\Inc;..\..\Application\PID;..\..\Middlewares\COMMUNICATION;..\..\Drivers\BSP\LED;..\..\Drivers\BSP\KEY;..\..\Drivers\BSP\TIMER;..\..\Drivers\SYSTEM\delay;..\..\Drivers\SYSTEM\sys;..\..\Drivers\SYSTEM\usart;..\..\Drivers\STM32F1xx_HAL_Driver\Inc;..\..\Drivers\CMSIS\Device\ST\STM32F1xx\Include;..\..\Drivers\CMSIS\Include;..\..\Drivers\BSP\BEEP</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -442,6 +442,11 @@
               <FileName>timer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Drivers\BSP\TIMER\timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>beep.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\BSP\BEEP\beep.c</FilePath>
             </File>
           </Files>
         </Group>
