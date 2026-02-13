@@ -21,10 +21,11 @@ int main(void) {
 
     delay_init(72);      // 延时函数初始化
     usart_init(115200);  // 串口初始化为115200
-    usmart_init(72);      // 初始化USMART调试组件
+    usmart_init(72);     // 初始化USMART调试组件
     led_init();          // LED端口初始化
     key_init();          // 初始化与按键连接的硬件接口
     beep_init();         // 初始化蜂鸣器
+    at24cxx_init();      // 初始化24C02 EEPROM
 
     // 使用                                                                              HAL 库初始化定时器3的 PWM 功能
     TIM3_PWM_Init(20000 - 1, 72 - 1);  // 50Hz舵机PWM频率
@@ -32,6 +33,9 @@ int main(void) {
     // PID 参数初始化
     pid_init(0.05, 0, 0.30, &PID_x);
     pid_init(0.03, 0, 0.30, &PID_y);
+
+    /* 尝试从24C02读取保存的PID参数 */
+    pid_load_from_eeprom();
 
     // 初始化坐标值
     coords[0] = 640;

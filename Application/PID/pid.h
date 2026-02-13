@@ -16,4 +16,8 @@ void pid_init(float Kp, float Ki, float Kd, PID_TypeDef* PID);  // 4个参数：Kp,K
 void pid_set_x(uint32_t kp, uint32_t ki, uint32_t kd);
 void pid_set_y(uint32_t kp, uint32_t ki, uint32_t kd);
 
+/* EEPROM保存/读取函数 */
+void pid_load_from_eeprom(void); /* 从24C02读取保存的PID参数 */
+void pid_save_to_eeprom(void);   /* 保存当前PID参数到24C02 */
+
 #endif
