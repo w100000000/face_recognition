@@ -70,21 +70,21 @@ int better_pid(int present, uint16_t target, PID_TypeDef* PID) {
 
 void pid_set_x(uint32_t kp, uint32_t ki, uint32_t kd) {
     pid_init(kp / 1000.0f, ki / 1000.0f, kd / 1000.0f, &PID_x);
-    pid_save_to_eeprom(); /* 保存EEPROM */
+    pid_save_to_eeprom();  // 保存EEPROM
 }
 
 void pid_set_y(uint32_t kp, uint32_t ki, uint32_t kd) {
     pid_init(kp / 1000.0f, ki / 1000.0f, kd / 1000.0f, &PID_y);
-    pid_save_to_eeprom(); /* 保存EEPROM */
+    pid_save_to_eeprom();  // 保存EEPROM
 }
 
-/* 从24C02读取保存的PID参数 */
+// 从24C02读取保存的PID参数
 void pid_load_from_eeprom(void) {
     uint8_t buf[4];
     uint32_t kp_x, ki_x, kd_x;
     uint32_t kp_y, ki_y, kd_y;
 
-    /* 读取X轴PID参数 */
+    // 读取X轴PID参数
     at24c02_read(PID_X_KP_ADDR, buf, 4);
     kp_x = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
 
@@ -94,7 +94,7 @@ void pid_load_from_eeprom(void) {
     at24c02_read(PID_X_KD_ADDR, buf, 4);
     kd_x = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
 
-    /* 读取Y轴PID参数 */
+    // 读取Y轴PID参数
     at24c02_read(PID_Y_KP_ADDR, buf, 4);
     kp_y = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
 
@@ -104,7 +104,7 @@ void pid_load_from_eeprom(void) {
     at24c02_read(PID_Y_KD_ADDR, buf, 4);
     kd_y = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
 
-    /* 检查参数是否有效（不是0xFFFFFFFF,表示未旧） */
+    // 如果读取到的参数不是0xFFFFFFFF(表示未写入过)，则加载到PID结构体中
     if (kp_x != 0xFFFFFFFF && ki_x != 0xFFFFFFFF && kd_x != 0xFFFFFFFF) {
         pid_init(kp_x / 1000.0f, ki_x / 1000.0f, kd_x / 1000.0f, &PID_x);
         printf("[PID] Load X from EEPROM: Kp=%d Ki=%d Kd=%d\r\n", kp_x, ki_x, kd_x);
@@ -116,13 +116,12 @@ void pid_load_from_eeprom(void) {
     }
 }
 
-/* 保存当前PID参数到24C02 */
+// 保存当前PID参数到24C02
 void pid_save_to_eeprom(void) {
     uint8_t buf[4];
     uint32_t kp_x, ki_x, kd_x;
     uint32_t kp_y, ki_y, kd_y;
 
-    /* 将浮点参数转为整数 */
     kp_x = (uint32_t)(PID_x.Kp * 1000);
     ki_x = (uint32_t)(PID_x.Ki * 1000);
     kd_x = (uint32_t)(PID_x.Kd * 1000);
@@ -131,7 +130,7 @@ void pid_save_to_eeprom(void) {
     ki_y = (uint32_t)(PID_y.Ki * 1000);
     kd_y = (uint32_t)(PID_y.Kd * 1000);
 
-    /* 保存X轴PID参数 */
+    // 保存X轴PID参数
     buf[0] = (kp_x >> 24) & 0xFF;
     buf[1] = (kp_x >> 16) & 0xFF;
     buf[2] = (kp_x >> 8) & 0xFF;
@@ -150,7 +149,7 @@ void pid_save_to_eeprom(void) {
     buf[3] = kd_x & 0xFF;
     at24c02_write(PID_X_KD_ADDR, buf, 4);
 
-    /* 保存Y轴PID参数 */
+    // 保存Y轴PID参数
     buf[0] = (kp_y >> 24) & 0xFF;
     buf[1] = (kp_y >> 16) & 0xFF;
     buf[2] = (kp_y >> 8) & 0xFF;
