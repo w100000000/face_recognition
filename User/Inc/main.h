@@ -1,6 +1,6 @@
 #ifndef __MAIN_H
 #define __MAIN_H
-#include "24cxx.h"
+#include "24c02.h"
 #include "delay.h"
 #include "key.h"
 #include "led.h"

@@ -6,7 +6,7 @@
  * 这下面要包含所用到的函数所申明的头文件(用户自己添加)
  */
 
-#include "24cxx.h"
+#include "24c02.h"
 #include "delay.h"
 #include "pid.h"
 #include "sys.h"
@@ -26,10 +26,10 @@ struct _m_usmart_nametab usmart_nametab[] = {
     (void*)delay_us,
     "void delay_us(uint32_t nus)",
 
-    (void*)at24cxx_read_one_byte,
-    "uint8_t at24cxx_read_one_byte(uint16_t addr)",
-    (void*)at24cxx_write_one_byte,
-    "void at24cxx_write_one_byte(uint16_t addr,uint8_t data)",
+    (void*)at24c02_read_one_byte,
+    "uint8_t at24c02_read_one_byte(uint16_t addr)",
+    (void*)at24c02_write_one_byte,
+    "void at24c02_write_one_byte(uint16_t addr,uint8_t data)",
 
     (void*)pid_set_x,
     "void pid_set_x(uint32_t kp,uint32_t ki,uint32_t kd)",
