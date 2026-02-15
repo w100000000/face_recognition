@@ -1,6 +1,7 @@
 
 #include "usmart_port.h"
 
+#include "usart.h"
 #include "usmart.h"
 
 TIM_HandleTypeDef g_timx_usmart_handle; /* 定时器句柄 */
@@ -17,7 +18,7 @@ char* usmart_get_input_string(void) {
     uint8_t len;
     char* pbuf = 0;
 
-    if (g_usart_rx_sta & 0x8000) /* 串口接收完成？ */
+    if (g_usart_rx_sta & 0x8000) /* 接收到完整的一行数据 */
     {
         len                 = g_usart_rx_sta & 0x3fff; /* 得到此次接收到的数据长度 */
         g_usart_rx_buf[len] = '\0';                    /* 在末尾加入结束符. */
