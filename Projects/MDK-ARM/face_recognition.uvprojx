@@ -313,7 +313,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>1</Optim>
+            <Optim>3</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F103xE,USE_HAL_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\User\Inc;..\..\Application\PID;..\..\Middlewares\COMMUNICATION;..\..\Drivers\BSP\LED;..\..\Drivers\BSP\KEY;..\..\Drivers\BSP\TIMER;..\..\Drivers\SYSTEM\delay;..\..\Drivers\SYSTEM\sys;..\..\Drivers\SYSTEM\usart;..\..\Drivers\STM32F1xx_HAL_Driver\Inc;..\..\Drivers\CMSIS\Device\ST\STM32F1xx\Include;..\..\Drivers\CMSIS\Include;..\..\Drivers\BSP\BEEP</IncludePath>
+              <IncludePath>..\..\User\Inc;..\..\Application\PID;..\..\Middlewares\COMMUNICATION;..\..\Drivers\BSP\LED;..\..\Drivers\BSP\KEY;..\..\Drivers\BSP\TIMER;..\..\Drivers\SYSTEM\delay;..\..\Drivers\SYSTEM\sys;..\..\Drivers\SYSTEM\usart;..\..\Drivers\STM32F1xx_HAL_Driver\Inc;..\..\Drivers\CMSIS\Device\ST\STM32F1xx\Include;..\..\Drivers\CMSIS\Include;..\..\Drivers\BSP\BEEP;..\..\Drivers\BSP\24C02;..\..\Drivers\BSP\IIC;..\..\Drivers\BSP\LCD;..\..\Middlewares\USMART</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -423,6 +423,26 @@
               <FileType>1</FileType>
               <FilePath>..\..\Middlewares\COMMUNICATION\serial_coord_parse.c</FilePath>
             </File>
+            <File>
+              <FileName>usmart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Middlewares\USMART\usmart.c</FilePath>
+            </File>
+            <File>
+              <FileName>usmart_config.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Middlewares\USMART\usmart_config.c</FilePath>
+            </File>
+            <File>
+              <FileName>usmart_port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Middlewares\USMART\usmart_port.c</FilePath>
+            </File>
+            <File>
+              <FileName>usmart_str.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Middlewares\USMART\usmart_str.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -447,6 +467,21 @@
               <FileName>beep.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Drivers\BSP\BEEP\beep.c</FilePath>
+            </File>
+            <File>
+              <FileName>24c02.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\BSP\24C02\24c02.c</FilePath>
+            </File>
+            <File>
+              <FileName>myiic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\BSP\IIC\myiic.c</FilePath>
+            </File>
+            <File>
+              <FileName>lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\BSP\LCD\lcd.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -522,6 +557,21 @@
               <FileName>stm32f1xx_hal_gpio.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f1xx_hal_sram.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_sram.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f1xx_hal_nor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_nor.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f1xx_ll_fsmc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_ll_fsmc.c</FilePath>
             </File>
           </Files>
         </Group>
