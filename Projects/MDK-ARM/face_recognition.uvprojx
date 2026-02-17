@@ -423,26 +423,6 @@
               <FileType>1</FileType>
               <FilePath>..\..\Middlewares\COMMUNICATION\serial_coord_parse.c</FilePath>
             </File>
-            <File>
-              <FileName>usmart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\Middlewares\USMART\usmart.c</FilePath>
-            </File>
-            <File>
-              <FileName>usmart_config.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\Middlewares\USMART\usmart_config.c</FilePath>
-            </File>
-            <File>
-              <FileName>usmart_port.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\Middlewares\USMART\usmart_port.c</FilePath>
-            </File>
-            <File>
-              <FileName>usmart_str.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\Middlewares\USMART\usmart_str.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
