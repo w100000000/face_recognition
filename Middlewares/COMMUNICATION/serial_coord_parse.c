@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "delay.h"
 #include "led.h"
 #include "sys.h"
 #include "usart.h"
@@ -79,8 +78,9 @@ void recieveData(void) {
         g_usart_rx_sta = 0;
     } else {
         times++;
-        if (times % 30 == 0)
+        if (times >= 30) {
+            times = 0;
             LED0_TOGGLE();  // 闪烁0号指示灯,提示系统正在运行.
-        delay_ms(10);
+        }
     }
 }
