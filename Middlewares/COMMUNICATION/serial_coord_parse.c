@@ -26,7 +26,9 @@ void recieveData(void) {
     {
         LED1_TOGGLE();  // 1号指示灯变更状态
 
-        len = g_usart_rx_sta & 0x3FFF;  // 得到此次接收到的数据长度
+        len                 = g_usart_rx_sta & 0x3FFF;  // 得到此次接收到的数据长度
+        FaceData_t faceData = {0};
+        faceData.timestamp  = HAL_GetTick();
 
         // 检查是否是 NAME: 协议
         if (len > 5 && g_usart_rx_buf[0] == 'N' && g_usart_rx_buf[1] == 'A' && g_usart_rx_buf[2] == 'M' &&
@@ -40,6 +42,13 @@ void recieveData(void) {
             }
             g_recognized_name[name_len] = '\0';  // 字符串结束符
             printf("Recognized: %s\r\n", g_recognized_name);
+
+            faceData.x     = coords[0];
+            faceData.y     = coords[1];
+            faceData.valid = 1;
+            strncpy(faceData.name, g_recognized_name, 31);
+            faceData.name[31] = '\0';
+            xQueueOverwrite(qFaceData, (void*)&faceData);
         }
         // 否则按坐标协议解析 #X$Y
         else {
@@ -72,6 +81,13 @@ void recieveData(void) {
             coords[0] = atoi(strX);
             coords[1] = atoi(strY);
             printf("Parsed: X=%d Y=%d (strX=%s strY=%s)\r\n", coords[0], coords[1], strX, strY);
+
+            faceData.x     = coords[0];
+            faceData.y     = coords[1];
+            faceData.valid = 1;
+            strncpy(faceData.name, g_recognized_name, 31);
+            faceData.name[31] = '\0';
+            xQueueOverwrite(qFaceData, (void*)&faceData);
         }
 
         // 标志位清零

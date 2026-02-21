@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "FreeRTOS.h"
+#include "queue.h"
 #include "task.h"
 
 void SystemClock_Config(void);
@@ -11,6 +12,8 @@ static void TaskControlLoop(void* argument);
 static void TaskUiLcd(void* argument);
 // 定义全局变量
 PID_TypeDef PID_x, PID_y;  // 两个PID结构体PID_x和PID_y
+
+QueueHandle_t qFaceData = NULL;
 
 int coords[2];           // 当前坐标数组
 uint16_t targetX = 640;  // 当前x坐标
@@ -49,7 +52,7 @@ int main(void) {
     pid_init(0.05, 0, 0.30, &PID_x);
     pid_init(0.03, 0, 0.30, &PID_y);
 
-    /* 尝试从24C02读取保存的PID参数 */
+    // 尝试从24C02读取保存的PID参数
     pid_load_from_eeprom();
 
     // 初始化坐标值
@@ -69,6 +72,12 @@ int main(void) {
     lcd_show_string(70, 10, 150, 24, 16, "No Face", RED);  // 默认显示没检测到人脸
 
     last_tick = HAL_GetTick();  // 记录初始时间
+
+    qFaceData = xQueueCreate(1, sizeof(FaceData_t));
+    if (qFaceData == NULL) {
+        while (1) {
+        }
+    }
 
     xTaskCreate(TaskControlLoop, "Ctrl", 256, NULL, 4, NULL);
     xTaskCreate(TaskUiLcd, "Ui", 256, NULL, 2, NULL);
@@ -98,6 +107,7 @@ int main(void) {
 
 static void TaskControlLoop(void* argument) {
     TickType_t lastWakeTime = xTaskGetTickCount();
+    FaceData_t faceData     = {0};
     (void)argument;
 
     while (1) {
@@ -113,6 +123,11 @@ static void TaskControlLoop(void* argument) {
 
         // 串口读取最新坐标
         recieveData();
+
+        if (xQueuePeek(qFaceData, (void*)&faceData, 0) == pdTRUE && faceData.valid) {
+            coords[0] = faceData.x;
+            coords[1] = faceData.y;
+        }
 
         // PID 计算并输出舵机PWM
         pwmval_x = pwmval_x + pid(coords[0], targetX, &PID_x);
