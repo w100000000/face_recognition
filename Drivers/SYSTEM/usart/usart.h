@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "FreeRTOS.h"
+#include "semphr.h"
 #include "stm32f1xx_hal.h"
 #include "stm32f1xx_hal_gpio.h"
 #include "stm32f1xx_hal_rcc.h"
@@ -33,6 +35,7 @@
 #define RXBUFFERSIZE 1     // 接收缓存区大小
 
 extern UART_HandleTypeDef g_uart1_handle;
+extern SemaphoreHandle_t g_uart_rx_sem;
 
 extern uint8_t g_usart_rx_buf[USART_REC_LEN];  // 接收缓冲,最大USART_REC_LEN个字节.末字节为换行符
 extern uint16_t g_usart_rx_sta;                // 接收状态标记

@@ -54,6 +54,8 @@ int fputc(int ch, FILE* f) {
 
 #if USART_EN_RX  // 如果使能了接收
 
+SemaphoreHandle_t g_uart_rx_sem = NULL;
+
 uint8_t g_usart_rx_buf[USART_REC_LEN];  // 接收缓冲, 最大USART_REC_LEN个字节
 // 接收状态
 //  bit15，      接收完成标志
@@ -96,12 +98,12 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart) {
 
         gpio_init_struct.Pin  = GPIO_PIN_10;  // PA10
         gpio_init_struct.Mode = GPIO_MODE_INPUT;
-        gpio_init_struct.Pull = GPIO_NOPULL;     // 浮空输入
-        HAL_GPIO_Init(GPIOA, &gpio_init_struct); /* 串口RX脚 必须设置成输入模式 */
+        gpio_init_struct.Pull = GPIO_NOPULL;      // 浮空输入
+        HAL_GPIO_Init(GPIOA, &gpio_init_struct);  // 串口RX脚 必须设置成输入模式
 
 #if USART_EN_RX
-        HAL_NVIC_EnableIRQ(USART_UX_IRQn);         /* 使能USART1中断通道 */
-        HAL_NVIC_SetPriority(USART_UX_IRQn, 3, 3); /* 组2，最低优先级:抢占优先级3，子优先级3 */
+        HAL_NVIC_EnableIRQ(USART_UX_IRQn);
+        HAL_NVIC_SetPriority(USART_UX_IRQn, 3, 3);  // 组2，最低优先级:抢占优先级3，子优先级3
 #endif
     }
 }
@@ -119,6 +121,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart) {
                 } else                   // 接收到的是0x0a（即换行键）
                 {
                     g_usart_rx_sta |= 0x8000;  // 接收完成了
+
+                    if (g_uart_rx_sem != NULL) {
+                        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+                        xSemaphoreGiveFromISR(g_uart_rx_sem, &xHigherPriorityTaskWoken);
+                        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+                    }
                 }
             } else  // 还没收到0X0d（即回车键）
             {

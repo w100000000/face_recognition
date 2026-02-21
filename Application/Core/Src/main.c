@@ -80,6 +80,12 @@ int main(void) {
         }
     }
 
+    g_uart_rx_sem = xSemaphoreCreateBinary();
+    if (g_uart_rx_sem == NULL) {
+        while (1) {
+        }
+    }
+
     xTaskCreate(TaskControlLoop, "Ctrl", 256, NULL, 4, NULL);
     xTaskCreate(TaskUartRxParse, "Uart", 256, NULL, 3, NULL);
     xTaskCreate(TaskUiLcd, "Ui", 256, NULL, 2, NULL);
@@ -145,8 +151,9 @@ static void TaskUartRxParse(void* argument) {
     (void)argument;
 
     while (1) {
-        recieveData();
-        vTaskDelay(pdMS_TO_TICKS(5));
+        if (xSemaphoreTake(g_uart_rx_sem, portMAX_DELAY) == pdTRUE) {
+            recieveData();
+        }
     }
 }
 
