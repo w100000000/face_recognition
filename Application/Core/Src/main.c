@@ -9,6 +9,7 @@
 
 void SystemClock_Config(void);
 static void TaskControlLoop(void* argument);
+static void TaskUartRxParse(void* argument);
 static void TaskUiLcd(void* argument);
 // 定义全局变量
 PID_TypeDef PID_x, PID_y;  // 两个PID结构体PID_x和PID_y
@@ -80,6 +81,7 @@ int main(void) {
     }
 
     xTaskCreate(TaskControlLoop, "Ctrl", 256, NULL, 4, NULL);
+    xTaskCreate(TaskUartRxParse, "Uart", 256, NULL, 3, NULL);
     xTaskCreate(TaskUiLcd, "Ui", 256, NULL, 2, NULL);
     vTaskStartScheduler();
 
@@ -121,9 +123,6 @@ static void TaskControlLoop(void* argument) {
             __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pwmval_y);
         }
 
-        // 串口读取最新坐标
-        recieveData();
-
         if (xQueuePeek(qFaceData, (void*)&faceData, 0) == pdTRUE && faceData.valid) {
             coords[0] = faceData.x;
             coords[1] = faceData.y;
@@ -139,6 +138,15 @@ static void TaskControlLoop(void* argument) {
             __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pwmval_y);
 
         vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(20));
+    }
+}
+
+static void TaskUartRxParse(void* argument) {
+    (void)argument;
+
+    while (1) {
+        recieveData();
+        vTaskDelay(pdMS_TO_TICKS(5));
     }
 }
 
