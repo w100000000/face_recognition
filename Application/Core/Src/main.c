@@ -11,6 +11,13 @@ void SystemClock_Config(void);
 static void TaskControlLoop(void* argument);
 static void TaskUartRxParse(void* argument);
 static void TaskUiLcd(void* argument);
+
+// 配置参数
+#define SCREEN_WIDTH 1280     // 图像宽度
+#define SCREEN_HEIGHT 720     // 图像高度
+#define FACE_TIMEOUT_MS 3000  // 人脸超时时间(ms)
+#define SMOOTH_FACTOR 10      // 回中平滑系数(越大越平滑)
+
 // 定义全局变量
 PID_TypeDef PID_x, PID_y;  // 两个PID结构体PID_x和PID_y
 
@@ -129,9 +136,22 @@ static void TaskControlLoop(void* argument) {
             __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pwmval_y);
         }
 
+        // 读取人脸数据并进行校验
         if (xQueuePeek(qFaceData, (void*)&faceData, 0) == pdTRUE && faceData.valid) {
-            coords[0] = faceData.x;
-            coords[1] = faceData.y;
+            uint32_t current_time = HAL_GetTick();
+            uint32_t data_age     = current_time - faceData.timestamp;
+
+            // 数据有效性检查：在超时范围内且坐标合法
+            if (data_age < FACE_TIMEOUT_MS && faceData.x >= 0 && faceData.x <= SCREEN_WIDTH && faceData.y >= 0 &&
+                faceData.y <= SCREEN_HEIGHT) {
+                // 数据有效：使用新坐标
+                coords[0] = faceData.x;
+                coords[1] = faceData.y;
+            } else {
+                // 数据超时或无效：平滑回中
+                coords[0] = (coords[0] * (SMOOTH_FACTOR - 1) + (SCREEN_WIDTH / 2)) / SMOOTH_FACTOR;
+                coords[1] = (coords[1] * (SMOOTH_FACTOR - 1) + (SCREEN_HEIGHT / 2)) / SMOOTH_FACTOR;
+            }
         }
 
         // PID 计算并输出舵机PWM
