@@ -33,7 +33,28 @@ static uint16_t pwmval_x = 1500;
 static uint16_t pwmval_y = 1500;
 
 extern char g_recognized_name[32];  // 从串口解析模块获取的识别人名
+
+// 看门狗句柄
+IWDG_HandleTypeDef hiwdg;
+
 /* Private functions ---------------------------------------------------------*/
+
+/**
+ * @brief  初始化独立看门狗（超时约4秒）
+ * @param  None
+ * @retval None
+ */
+void IWDG_Init(void) {
+    hiwdg.Instance       = IWDG;
+    hiwdg.Init.Prescaler = IWDG_PRESCALER_64;  // 40KHz / 64 = 625Hz
+    hiwdg.Init.Reload    = 2500;               // 2500 / 625Hz = 4秒超时
+
+    if (HAL_IWDG_Init(&hiwdg) != HAL_OK) {
+        // 初始化失败处理
+        while (1) {
+        }
+    }
+}
 
 /**
  * @brief  Main program
@@ -96,6 +117,10 @@ int main(void) {
     xTaskCreate(TaskControlLoop, "Ctrl", 256, NULL, 4, NULL);
     xTaskCreate(TaskUartRxParse, "Uart", 256, NULL, 3, NULL);
     xTaskCreate(TaskUiLcd, "Ui", 256, NULL, 2, NULL);
+
+    // 启动看门狗（RTOS调度器启动后开始喂狗）
+    IWDG_Init();
+
     vTaskStartScheduler();
 
     while (1) {
@@ -126,6 +151,9 @@ static void TaskControlLoop(void* argument) {
     (void)argument;
 
     while (1) {
+        // 喂狗（4秒超时，20ms喂一次非常安全）
+        HAL_IWDG_Refresh(&hiwdg);
+
         // 按下 KEY0 立即回到舵机中点
         if (key_scan(0) == KEY0_PRES) {
             targetX  = 640;

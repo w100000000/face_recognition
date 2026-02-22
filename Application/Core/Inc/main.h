@@ -13,11 +13,13 @@
 #include "stm32f1xx_hal_rcc.h"
 #include "stm32f1xx_hal_tim.h"
 #include "stm32f1xx_hal_uart.h"
+#include "stm32f1xx_hal_iwdg.h"
 #include "timer.h"
 #include "usart.h"
 #include "usmart.h"
 
 void SystemClock_Config(void);
+void IWDG_Init(void);
 void assert_failed(uint8_t* file, uint32_t line);
 
 #endif /* __MAIN_H */
