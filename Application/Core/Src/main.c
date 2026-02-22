@@ -16,10 +16,23 @@ static void TaskUiLcd(void* argument);
 #define SCREEN_WIDTH 1280     // 图像宽度
 #define SCREEN_HEIGHT 720     // 图像高度
 #define FACE_TIMEOUT_MS 3000  // 人脸超时时间(ms)
-#define SMOOTH_FACTOR 10      // 回中平滑系数(越大越平滑)
+#define SMOOTH_FACTOR 10      // 回中平滑系数，利用加权平均(越大越平滑)
+
+// 状态定义
+typedef enum {
+    STATE_IDLE      = 0,  // 空闲（无人脸检测）
+    STATE_TRACKING  = 1,  // 追踪中（有有效人脸）
+    STATE_LOST      = 2,  // 目标丢失（刚丢失，可能还会回来）
+    STATE_RETURNING = 3   // 回中（平滑回到中点）
+} TrackingState_t;
+
+const char* state_names[] = {"IDLE", "TRACKING", "LOST", "RETURNING"};
 
 // 定义全局变量
-PID_TypeDef PID_x, PID_y;  // 两个PID结构体PID_x和PID_y
+PID_TypeDef PID_x, PID_y;                       // 两个PID结构体PID_x和PID_y
+TrackingState_t g_tracking_state = STATE_IDLE;  // 追踪状态
+uint32_t g_lost_time             = 0;           // 目标丢失时刻
+const uint32_t LOST_TIMEOUT_MS   = 3000;        // 目标丢失后3秒开始回中
 
 QueueHandle_t qFaceData = NULL;
 
@@ -38,6 +51,101 @@ extern char g_recognized_name[32];  // 从串口解析模块获取的识别人名
 IWDG_HandleTypeDef hiwdg;
 
 /* Private functions ---------------------------------------------------------*/
+
+/**
+ * @brief  更新追踪状态
+ * @param  face_data 人脸数据
+ * @retval None
+ */
+void update_tracking_state(FaceData_t* face_data) {
+    uint32_t current_time = HAL_GetTick();
+    uint32_t data_age     = current_time - face_data->timestamp;
+
+    // 数据有效性检查
+    uint8_t data_valid = (face_data->valid && data_age < FACE_TIMEOUT_MS && face_data->x >= 0 &&
+                          face_data->x <= SCREEN_WIDTH && face_data->y >= 0 && face_data->y <= SCREEN_HEIGHT);
+
+    // 状态转移逻辑
+    switch (g_tracking_state) {
+        case STATE_IDLE:
+            if (data_valid) {
+                g_tracking_state = STATE_TRACKING;
+                LED0(0);  // LED灭
+            }
+            break;
+
+        case STATE_TRACKING:
+            if (!data_valid) {
+                g_tracking_state = STATE_LOST;
+                g_lost_time      = current_time;
+                LED0(1);  // LED亮起
+            }
+            break;
+
+        case STATE_LOST:
+            if (data_valid) {
+                // 目标重新出现，回到追踪
+                g_tracking_state = STATE_TRACKING;
+                LED0(0);
+            } else if (current_time - g_lost_time > LOST_TIMEOUT_MS) {
+                // 丢失超过3秒，开始平滑回中
+                g_tracking_state = STATE_RETURNING;
+            }
+            break;
+
+        case STATE_RETURNING:
+            if (data_valid) {
+                // 追踪期间收到新人脸，直接回到追踪
+                g_tracking_state = STATE_TRACKING;
+                LED0(0);
+            } else if (abs(coords[0] - 640) < 5 && abs(coords[1] - 360) < 5) {
+                // 已回到中点
+                g_tracking_state = STATE_IDLE;
+            }
+            break;
+
+        default:
+            g_tracking_state = STATE_IDLE;
+    }
+}
+
+/**
+ * @brief  根据状态执行对应动作
+ * @param  face_data 人脸数据
+ * @retval None
+ */
+void execute_tracking_action(FaceData_t* face_data) {
+    uint32_t current_time = HAL_GetTick();
+    uint32_t data_age     = current_time - face_data->timestamp;
+
+    switch (g_tracking_state) {
+        case STATE_IDLE:
+            // 空闲：保持中点，不更新坐标
+            break;
+
+        case STATE_TRACKING:
+            // 追踪：使用人脸坐标
+            if (face_data->valid && data_age < FACE_TIMEOUT_MS && face_data->x >= 0 && face_data->x <= SCREEN_WIDTH &&
+                face_data->y >= 0 && face_data->y <= SCREEN_HEIGHT) {
+                coords[0] = face_data->x;
+                coords[1] = face_data->y;
+            }
+            break;
+
+        case STATE_LOST:
+            // 目标丢失：保持当前位置，但不更新坐标
+            break;
+
+        case STATE_RETURNING:
+            // 回中：平滑移动到中点
+            coords[0] = (coords[0] * (SMOOTH_FACTOR - 1) + (SCREEN_WIDTH / 2)) / SMOOTH_FACTOR;
+            coords[1] = (coords[1] * (SMOOTH_FACTOR - 1) + (SCREEN_HEIGHT / 2)) / SMOOTH_FACTOR;
+            break;
+
+        default:
+            break;
+    }
+}
 
 /**
  * @brief  初始化独立看门狗（超时约4秒）
@@ -151,35 +259,27 @@ static void TaskControlLoop(void* argument) {
     (void)argument;
 
     while (1) {
-        // 喂狗（4秒超时，20ms喂一次非常安全）
+        // 喂狗（4秒超时，20ms喂一次）
         HAL_IWDG_Refresh(&hiwdg);
 
-        // 按下 KEY0 立即回到舵机中点
+        // 按下 KEY0 立即回到舵机中点并重置状态
         if (key_scan(0) == KEY0_PRES) {
-            targetX  = 640;
-            targetY  = 360;
-            pwmval_x = 1500;
-            pwmval_y = 1500;
+            targetX          = 640;
+            targetY          = 360;
+            pwmval_x         = 1500;
+            pwmval_y         = 1500;
+            g_tracking_state = STATE_IDLE;  // 重置状态
             __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pwmval_x);
             __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pwmval_y);
         }
 
-        // 读取人脸数据并进行校验
-        if (xQueuePeek(qFaceData, (void*)&faceData, 0) == pdTRUE && faceData.valid) {
-            uint32_t current_time = HAL_GetTick();
-            uint32_t data_age     = current_time - faceData.timestamp;
+        // 读取人脸数据
+        if (xQueuePeek(qFaceData, (void*)&faceData, 0) == pdTRUE) {
+            // 更新状态
+            update_tracking_state(&faceData);
 
-            // 数据有效性检查：在超时范围内且坐标合法
-            if (data_age < FACE_TIMEOUT_MS && faceData.x >= 0 && faceData.x <= SCREEN_WIDTH && faceData.y >= 0 &&
-                faceData.y <= SCREEN_HEIGHT) {
-                // 数据有效：使用新坐标
-                coords[0] = faceData.x;
-                coords[1] = faceData.y;
-            } else {
-                // 数据超时或无效：平滑回中
-                coords[0] = (coords[0] * (SMOOTH_FACTOR - 1) + (SCREEN_WIDTH / 2)) / SMOOTH_FACTOR;
-                coords[1] = (coords[1] * (SMOOTH_FACTOR - 1) + (SCREEN_HEIGHT / 2)) / SMOOTH_FACTOR;
-            }
+            // 执行状态对应的动作
+            execute_tracking_action(&faceData);
         }
 
         // PID 计算并输出舵机PWM
@@ -209,7 +309,7 @@ static void TaskUiLcd(void* argument) {
     (void)argument;
 
     while (1) {
-        // 每秒更新一次时间和姓名显示
+        // 每秒更新一次时间、姓名和状态显示
         if (HAL_GetTick() - last_tick >= 1000) {
             system_time_sec++;
             last_tick = HAL_GetTick();
@@ -225,6 +325,13 @@ static void TaskUiLcd(void* argument) {
 
             lcd_fill(70, 10, 220, 26, WHITE);
             lcd_show_string(70, 10, 150, 24, 16, g_recognized_name, RED);
+
+            // 显示追踪状态
+            char state_str[32];
+            sprintf(state_str, "State: %s", state_names[g_tracking_state]);
+            lcd_fill(10, 70, 200, 86, WHITE);
+            uint16_t state_color = (g_tracking_state == STATE_TRACKING) ? GREEN : BLUE;
+            lcd_show_string(10, 70, 200, 16, 12, state_str, state_color);
         }
 
         vTaskDelay(pdMS_TO_TICKS(100));
