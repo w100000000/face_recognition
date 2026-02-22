@@ -175,12 +175,12 @@ int main(void) {
 
     delay_init(72);      // 延时函数初始化
     usart_init(115200);  // 串口初始化为115200
-    usmart_init(72);     // 初始化USMART调试组件
-    led_init();          // LED端口初始化
-    key_init();          // 初始化与按键连接的硬件接口
-    beep_init();         // 初始化蜂鸣器
-    at24c02_init();      // 初始化24C02 EEPROM
-    lcd_init();          // 初始化LCD
+    // usmart_init(72);     // 初始化USMART调试组件
+    led_init();      // LED端口初始化
+    key_init();      // 初始化与按键连接的硬件接口
+    beep_init();     // 初始化蜂鸣器
+    at24c02_init();  // 初始化24C02 EEPROM
+    lcd_init();      // 初始化LCD
 
     // 使用                                                                              HAL 库初始化定时器3的 PWM 功能
     TIM3_PWM_Init(20000 - 1, 72 - 1);  // 50Hz舵机PWM频率
