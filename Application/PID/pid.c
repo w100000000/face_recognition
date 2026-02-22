@@ -32,23 +32,8 @@ void pid_init(float Kp, float Ki, float Kd, PID_TypeDef* PID) {
     PID->output      = 0;
 }
 
-// 1、位置PID
+// 改进版位置PID(对微分项进行改善，考虑历史信息，降噪)
 int pid(int present, uint16_t target, PID_TypeDef* PID) {
-    PID->error = target - present;  // 本次误差 = 目标值 - 实际值
-
-    PID->p_out = PID->Kp * PID->error;                      // 比例
-    PID->i_out += PID->Ki * PID->error;                     // 积分
-    PID->d_out = PID->Kd * (PID->error - PID->last_error);  // 微分
-
-    PID->output = PID->p_out + PID->i_out + PID->d_out;  // 输出
-
-    PID->last_error = PID->error;
-
-    return PID->output;
-}
-
-// 2、改进版位置PID(对微分项进行改善，考虑历史信息，降噪)
-int better_pid(int present, uint16_t target, PID_TypeDef* PID) {
     PID->error = target - present;  // 本次误差 = 目标值 - 实际值
 
     PID->p_out = PID->Kp * PID->error;   // 比例
