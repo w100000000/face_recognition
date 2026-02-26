@@ -597,16 +597,16 @@ void lcd_init(void) {
     g_sram_handle.Init.WriteBurst = FSMC_WRITE_BURST_DISABLE; /* 禁止突发写 */
 
     /* FSMC读时序控制寄存器 */
-    fsmc_read_handle.AddressSetupTime = 0; /* 地址建立时间(ADDSET)为1个HCLK 1/72M = 13.9ns (实际 > 200ns) */
+    fsmc_read_handle.AddressSetupTime = 2; /* 适当放宽地址建立时间,提升总线稳定性 */
     fsmc_read_handle.AddressHoldTime  = 0; /* 地址保持时间(ADDHLD) 模式A是没有用到 */
     /* 因为液晶驱动IC的读数据的时候，速度不能太快,尤其是个别奇葩芯片 */
-    fsmc_read_handle.DataSetupTime = 15;                 /* 数据保存时间(DATAST)为16个HCLK = 13.9 * 16 = 222.4ns */
+    fsmc_read_handle.DataSetupTime = 30;                 /* 放宽读时序,降低花屏概率 */
     fsmc_read_handle.AccessMode    = FSMC_ACCESS_MODE_A; /* 模式A */
 
     /* FSMC写时序控制寄存器 */
-    fsmc_write_handle.AddressSetupTime = 0; /* 地址建立时间(ADDSET)为1个HCLK = 13.9ns */
-    fsmc_write_handle.AddressHoldTime  = 0; /* 地址保持时间(ADDHLD) 模式A是没有用到 */
-    fsmc_write_handle.DataSetupTime    = 1; /* 数据保存时间(DATAST)为2个HCLK = 13.9 * 2 = 27.8ns (实际 > 200ns) */
+    fsmc_write_handle.AddressSetupTime = 2;  /* 放宽地址建立时间 */
+    fsmc_write_handle.AddressHoldTime  = 0;  /* 地址保持时间(ADDHLD) 模式A是没有用到 */
+    fsmc_write_handle.DataSetupTime    = 12; /* 显著放宽写时序,抑制随机彩线/黑块 */
     /* 某些液晶驱动IC的写信号脉宽，最少也得50ns。 */
     fsmc_write_handle.AccessMode = FSMC_ACCESS_MODE_A; /* 模式A */
 
@@ -733,13 +733,16 @@ void lcd_init(void) {
 void lcd_clear(uint16_t color) {
     uint32_t index      = 0;
     uint32_t totalpoint = lcddev.width;
-    totalpoint *= lcddev.height;  /* 得到总点数 */
-    lcd_set_cursor(0x00, 0x0000); /* 设置光标位置 */
-    lcd_write_ram_prepare();      /* 开始写入GRAM */
+    totalpoint *= lcddev.height;                       /* 得到总点数 */
+    lcd_set_window(0, 0, lcddev.width, lcddev.height); /* 设置全屏窗口 */
+    lcd_set_cursor(0x00, 0x0000);                      /* 设置光标位置 */
+    lcd_write_ram_prepare();                           /* 开始写入GRAM */
 
     for (index = 0; index < totalpoint; index++) {
         LCD->LCD_RAM = color;
     }
+
+    lcd_set_window(0, 0, lcddev.width, lcddev.height); /* 恢复全屏窗口 */
 }
 
 /**
@@ -749,18 +752,28 @@ void lcd_clear(uint16_t color) {
  * @retval      无
  */
 void lcd_fill(uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey, uint32_t color) {
-    uint16_t i, j;
-    uint16_t xlen = 0;
-    xlen          = ex - sx + 1;
+    uint32_t index;
+    uint32_t totalpoint;
+    uint16_t width;
+    uint16_t height;
 
-    for (i = sy; i <= ey; i++) {
-        lcd_set_cursor(sx, i);   /* 设置光标位置 */
-        lcd_write_ram_prepare(); /* 开始写入GRAM */
-
-        for (j = 0; j < xlen; j++) {
-            LCD->LCD_RAM = color; /* 显示颜色 */
-        }
+    if (sx > ex || sy > ey) {
+        return;
     }
+
+    width      = ex - sx + 1;
+    height     = ey - sy + 1;
+    totalpoint = (uint32_t)width * height;
+
+    lcd_set_window(sx, sy, width, height);
+    lcd_set_cursor(sx, sy);
+    lcd_write_ram_prepare();
+
+    for (index = 0; index < totalpoint; index++) {
+        LCD->LCD_RAM = color;
+    }
+
+    lcd_set_window(0, 0, lcddev.width, lcddev.height);
 }
 
 /**
