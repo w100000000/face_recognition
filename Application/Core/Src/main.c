@@ -17,6 +17,9 @@ static void TaskUiLcd(void* argument);
 #define SCREEN_HEIGHT 720     // 图像高度
 #define FACE_TIMEOUT_MS 3000  // 人脸超时时间(ms)
 #define SMOOTH_FACTOR 10      // 回中平滑系数，利用加权平均(越大越平滑)
+#define CONTROL_PERIOD_MS 20  // 控制环目标周期(ms)
+#define JITTER_REPORT_SAMPLES 500
+#define CPU_REPORT_INTERVAL_MS 1000
 
 // 状态定义
 typedef enum {
@@ -40,10 +43,11 @@ int coords[2];           // 当前坐标数组
 uint16_t targetX = 640;  // 当前x坐标
 uint16_t targetY = 360;  // 当前y坐标
 
-uint32_t system_time_sec = 0;  // 系统运行秒数
-uint32_t last_tick       = 0;  // 上次更新时间的tick值
-static uint16_t pwmval_x = 1500;
-static uint16_t pwmval_y = 1500;
+uint32_t system_time_sec              = 0;  // 系统运行秒数
+uint32_t last_tick                    = 0;  // 上次更新时间的tick值
+static uint16_t pwmval_x              = 1500;
+static uint16_t pwmval_y              = 1500;
+volatile uint32_t g_idle_hook_counter = 0;
 
 extern char g_recognized_name[32];  // 从串口解析模块获取的识别人名
 
@@ -258,9 +262,48 @@ int main(void) {
 static void TaskControlLoop(void* argument) {
     TickType_t lastWakeTime = xTaskGetTickCount();
     FaceData_t faceData     = {0};
+    TickType_t prevTick     = 0;
+    int32_t jitterMin       = 0;
+    int32_t jitterMax       = 0;
+    uint32_t jitterCount    = 0;
+    uint32_t jitterAbsSum   = 0;
     (void)argument;
 
     while (1) {
+        TickType_t nowTick = xTaskGetTickCount();
+        if (prevTick != 0) {
+            int32_t periodMs = (int32_t)((nowTick - prevTick) * portTICK_PERIOD_MS);
+            int32_t jitterMs = periodMs - CONTROL_PERIOD_MS;
+            int32_t absJitterMs;
+
+            if (jitterCount == 0) {
+                jitterMin = jitterMs;
+                jitterMax = jitterMs;
+            } else {
+                if (jitterMs < jitterMin) {
+                    jitterMin = jitterMs;
+                }
+                if (jitterMs > jitterMax) {
+                    jitterMax = jitterMs;
+                }
+            }
+
+            absJitterMs = (jitterMs >= 0) ? jitterMs : -jitterMs;
+            jitterAbsSum += (uint32_t)absJitterMs;
+            jitterCount++;
+
+            if (jitterCount >= JITTER_REPORT_SAMPLES) {
+                uint32_t avgAbsJitter = jitterAbsSum / jitterCount;
+                printf("[JITTER] N=%lu target=%dms min=%ldms max=%ldms pp=%ldms avg_abs=%lums\r\n",
+                       (unsigned long)jitterCount, CONTROL_PERIOD_MS, (long)jitterMin, (long)jitterMax,
+                       (long)(jitterMax - jitterMin), (unsigned long)avgAbsJitter);
+
+                jitterCount  = 0;
+                jitterAbsSum = 0;
+            }
+        }
+        prevTick = nowTick;
+
         // 喂狗（4秒超时，20ms喂一次）
         HAL_IWDG_Refresh(&hiwdg);
 
@@ -293,7 +336,7 @@ static void TaskControlLoop(void* argument) {
         if (pwmval_y > 500 && pwmval_y < 2000)
             __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pwmval_y);
 
-        vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(20));
+        vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(CONTROL_PERIOD_MS));
     }
 }
 
@@ -309,12 +352,24 @@ static void TaskUartRxParse(void* argument) {
 
 static void TaskUiLcd(void* argument) {
     (void)argument;
+    uint32_t idleCounterLast = 0;
+    uint32_t idleCounterPeak = 1;
 
     while (1) {
         // 每秒更新一次时间、姓名和状态显示
-        if (HAL_GetTick() - last_tick >= 1000) {
+        if (HAL_GetTick() - last_tick >= CPU_REPORT_INTERVAL_MS) {
             system_time_sec++;
             last_tick = HAL_GetTick();
+
+            uint32_t idleCounterNow = g_idle_hook_counter;
+            uint32_t idleDelta      = idleCounterNow - idleCounterLast;
+            idleCounterLast         = idleCounterNow;
+            if (idleDelta > idleCounterPeak) {
+                idleCounterPeak = idleDelta;
+            }
+            uint32_t idlePercent = (idleDelta * 100U) / idleCounterPeak;
+            printf("[CPU] idle_loop=%lu peak=%lu idle_est=%lu%% busy_est=%lu%%\r\n", (unsigned long)idleDelta,
+                   (unsigned long)idleCounterPeak, (unsigned long)idlePercent, (unsigned long)(100U - idlePercent));
 
             uint16_t hours   = system_time_sec / 3600;
             uint16_t minutes = (system_time_sec % 3600) / 60;
@@ -338,6 +393,10 @@ static void TaskUiLcd(void* argument) {
 
         vTaskDelay(pdMS_TO_TICKS(100));
     }
+}
+
+void vApplicationIdleHook(void) {
+    g_idle_hook_counter++;
 }
 
 void SystemClock_Config(void) {
