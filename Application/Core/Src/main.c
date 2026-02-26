@@ -48,6 +48,10 @@ uint32_t last_tick                    = 0;  // 上次更新时间的tick值
 static uint16_t pwmval_x              = 1500;
 static uint16_t pwmval_y              = 1500;
 volatile uint32_t g_idle_hook_counter = 0;
+volatile int32_t g_jitter_min_ms      = 0;
+volatile int32_t g_jitter_max_ms      = 0;
+volatile uint32_t g_jitter_avg_abs_ms = 0;
+volatile uint32_t g_jitter_sample_n   = 0;
 
 extern char g_recognized_name[32];  // 从串口解析模块获取的识别人名
 
@@ -212,6 +216,7 @@ int main(void) {
     lcd_fill(0, 0, lcddev.width - 1, lcddev.height - 1, WHITE);  // 强制全屏白底
     lcd_show_string(10, 10, 200, 24, 16, "Name:", BLUE);         // 显示标签
     lcd_show_string(10, 40, 200, 24, 16, "Time:", BLUE);         // 时间标签
+    lcd_show_string(10, 100, 200, 24, 16, "Jit:", BLUE);         // 抖动标签
     lcd_show_string(70, 10, 150, 24, 16, "No Face", RED);        // 默认显示没检测到人脸
 
     last_tick = HAL_GetTick();  // 记录初始时间
@@ -294,9 +299,10 @@ static void TaskControlLoop(void* argument) {
 
             if (jitterCount >= JITTER_REPORT_SAMPLES) {
                 uint32_t avgAbsJitter = jitterAbsSum / jitterCount;
-                printf("[JITTER] N=%lu target=%dms min=%ldms max=%ldms pp=%ldms avg_abs=%lums\r\n",
-                       (unsigned long)jitterCount, CONTROL_PERIOD_MS, (long)jitterMin, (long)jitterMax,
-                       (long)(jitterMax - jitterMin), (unsigned long)avgAbsJitter);
+                g_jitter_min_ms       = jitterMin;
+                g_jitter_max_ms       = jitterMax;
+                g_jitter_avg_abs_ms   = avgAbsJitter;
+                g_jitter_sample_n     = jitterCount;
 
                 jitterCount  = 0;
                 jitterAbsSum = 0;
@@ -368,8 +374,6 @@ static void TaskUiLcd(void* argument) {
                 idleCounterPeak = idleDelta;
             }
             uint32_t idlePercent = (idleDelta * 100U) / idleCounterPeak;
-            printf("[CPU] idle_loop=%lu peak=%lu idle_est=%lu%% busy_est=%lu%%\r\n", (unsigned long)idleDelta,
-                   (unsigned long)idleCounterPeak, (unsigned long)idlePercent, (unsigned long)(100U - idlePercent));
 
             uint16_t hours   = system_time_sec / 3600;
             uint16_t minutes = (system_time_sec % 3600) / 60;
@@ -389,6 +393,12 @@ static void TaskUiLcd(void* argument) {
             lcd_fill(10, 70, 200, 86, WHITE);
             uint16_t state_color = (g_tracking_state == STATE_TRACKING) ? GREEN : BLUE;
             lcd_show_string(10, 70, 200, 16, 12, state_str, state_color);
+
+            char jitter_str[40];
+            sprintf(jitter_str, "N%lu %ld/%ld A%lu", (unsigned long)g_jitter_sample_n, (long)g_jitter_min_ms,
+                    (long)g_jitter_max_ms, (unsigned long)g_jitter_avg_abs_ms);
+            lcd_fill(40, 100, 240, 116, WHITE);
+            lcd_show_string(40, 100, 220, 16, 12, jitter_str, BLUE);
         }
 
         vTaskDelay(pdMS_TO_TICKS(100));
