@@ -181,6 +181,7 @@ int main(void) {
     beep_init();     // 初始化蜂鸣器
     at24c02_init();  // 初始化24C02 EEPROM
     lcd_init();      // 初始化LCD
+    delay_ms(100);   // 等待LCD稳定
 
     // 使用                                                                              HAL 库初始化定时器3的 PWM 功能
     TIM3_PWM_Init(20000 - 1, 72 - 1);  // 50Hz舵机PWM频率
@@ -203,10 +204,11 @@ int main(void) {
     __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, pwmval_y);
 
     // LCD 初始化显示
-    lcd_clear(WHITE);                                      // 清屏为白色
-    lcd_show_string(10, 10, 200, 24, 16, "Name:", BLUE);   // 显示标签
-    lcd_show_string(10, 40, 200, 24, 16, "Time:", BLUE);   // 时间标签
-    lcd_show_string(70, 10, 150, 24, 16, "No Face", RED);  // 默认显示没检测到人脸
+    g_back_color = WHITE;                                        // 明确设置背景色
+    lcd_fill(0, 0, lcddev.width - 1, lcddev.height - 1, WHITE);  // 强制全屏白底
+    lcd_show_string(10, 10, 200, 24, 16, "Name:", BLUE);         // 显示标签
+    lcd_show_string(10, 40, 200, 24, 16, "Time:", BLUE);         // 时间标签
+    lcd_show_string(70, 10, 150, 24, 16, "No Face", RED);        // 默认显示没检测到人脸
 
     last_tick = HAL_GetTick();  // 记录初始时间
 

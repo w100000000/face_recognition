@@ -552,6 +552,7 @@ void lcd_init(void) {
     GPIO_InitTypeDef gpio_init_struct;
     FSMC_NORSRAM_TimingTypeDef fsmc_read_handle;
     FSMC_NORSRAM_TimingTypeDef fsmc_write_handle;
+    uint8_t lcd_reg_inited = 0;
 
     LCD_CS_GPIO_CLK_ENABLE(); /* LCD_CS脚时钟使能 */
     LCD_WR_GPIO_CLK_ENABLE(); /* LCD_WR脚时钟使能 */
@@ -705,23 +706,37 @@ void lcd_init(void) {
 
     if (lcddev.id == 0X7789) {
         lcd_ex_st7789_reginit(); /* 执行ST7789初始化 */
+        lcd_reg_inited = 1;
     } else if (lcddev.id == 0X9341) {
         lcd_ex_ili9341_reginit(); /* 执行ILI9341初始化 */
+        lcd_reg_inited = 1;
     } else if (lcddev.id == 0x5310) {
         lcd_ex_nt35310_reginit(); /* 执行NT35310初始化 */
+        lcd_reg_inited = 1;
     } else if (lcddev.id == 0x7796) {
         lcd_ex_st7796_reginit(); /* 执行ST7796初始化 */
+        lcd_reg_inited = 1;
     } else if (lcddev.id == 0x5510) {
         lcd_ex_nt35510_reginit(); /* 执行NT35510初始化 */
+        lcd_reg_inited = 1;
     } else if (lcddev.id == 0x9806) {
         lcd_ex_ili9806_reginit(); /* 执行ILI9806初始化 */
+        lcd_reg_inited = 1;
     } else if (lcddev.id == 0x1963) {
         lcd_ex_ssd1963_reginit();   /* 执行SSD1963初始化 */
         lcd_ssd_backlight_set(100); /* 背光设置为最亮 */
+        lcd_reg_inited = 1;
+    }
+
+    if (lcd_reg_inited == 0) {
+        printf("LCD ID unknown:0x%04X, fallback ILI9341\r\n", lcddev.id);
+        lcddev.id = 0x9341;
+        lcd_ex_ili9341_reginit();
     }
 
     lcd_display_dir(0); /* 默认为竖屏 */
-    LCD_BL(1);          /* 点亮背光 */
+    printf("LCD cfg id:0x%04X, w:%u, h:%u, dir:%u\r\n", lcddev.id, lcddev.width, lcddev.height, lcddev.dir);
+    LCD_BL(1); /* 点亮背光 */
     lcd_clear(WHITE);
 }
 
